@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  sqlserver:
+    container_name: mssql
+    image: mcr.microsoft.com/azure-sql-edge:latest
+    platform: linux/arm64/v8
+    environment:
+      ACCEPT_EULA: Y
+      SA_PASSWORD: DamBui1d3r$
+      DISABLE_SSL: 1
+    ports:
+      - "1433:1433"
+    volumes:
+      - $PWD/mssql-data:/var/opt/mssql/data
+
+  elasticsearch:
+    container_name: elasticsearch
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.16.1
+    ports:
+      - 9200:9200
+    volumes:
+      - elasticsearch-data:/usr/share/elasticsearch/data
+    environment:
+      - xpack.monitoring.enable=true
+      - xpack.watcher.enable=false
+      - "ES_JAVA_OPTS=Xms512 -Xms512m"
+      - discovery.type=single-singlenode
+
+volumes:
+  mssql-data:
+    driver: local
