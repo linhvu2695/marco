@@ -16,18 +16,21 @@ namespace CountryService.Controllers
         private readonly ICountryRepo _countryRepo;
         private readonly ICityRepo _cityRepo;
         private readonly IMapper _mapper;
+        private readonly ILogger<CountryController> _logger;
 
-        public CountryController(ICountryRepo countryRepo, ICityRepo cityRepo, IMapper mapper)
+        public CountryController(ICountryRepo countryRepo, ICityRepo cityRepo, IMapper mapper, ILogger<CountryController> logger)
         {
             _countryRepo = countryRepo;
             _cityRepo = cityRepo;
             _mapper = mapper;
+            _logger = logger;
         }
 
         [HttpGet]
         public ActionResult<IEnumerable<CountryReadDto>> GetCountries()
         {
             System.Console.WriteLine("--> Getting Countries...");
+            _logger.LogInformation("--> Getting Countries...", DateTime.UtcNow);
             
             var countryItem = _countryRepo.GetAllCountries();
 

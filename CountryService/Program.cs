@@ -1,5 +1,11 @@
+#nullable disable
+
+using System.Reflection;
 using CountryService.Data;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
+using Serilog.Exceptions;
+using Serilog.Sinks.Elasticsearch;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,6 +14,9 @@ builder.Services.AddDbContext<AppDbContext>(opt => opt.UseSqlServer(builder.Conf
 builder.Services.AddScoped<ICountryRepo, CountryRepo>();
 builder.Services.AddScoped<ICityRepo, CityRepo>();
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
+ConfigureLogs();
+builder.Host.UseSerilog();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -32,3 +41,36 @@ app.MapControllers();
 PrepDb.PrepPopulation(app);
 
 app.Run();
+
+
+# region helper
+void ConfigureLogs()
+{
+    // Get the environment which the application is running on
+    var env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+
+    // Get the configuration
+    var configuration = new ConfigurationBuilder().AddJsonFile(
+        "appsettings.Development.json", 
+        optional: false, 
+        reloadOnChange: true
+    ).Build();
+
+    Log.Logger = new LoggerConfiguration()
+        .Enrich.FromLogContext()
+        .Enrich.WithExceptionDetails() // add details exception
+        .WriteTo.Debug()
+        .WriteTo.Console()
+        .WriteTo.Elasticsearch(ConfigureELS(configuration, env))
+        .CreateLogger();
+}
+
+ElasticsearchSinkOptions ConfigureELS(IConfigurationRoot configuration, string env)
+{
+    return new ElasticsearchSinkOptions(new Uri(configuration["ELKConfiguration:Uri"]))
+    {
+        AutoRegisterTemplate = true,
+        IndexFormat = $"{Assembly.GetExecutingAssembly().GetName().Name.ToLower()}-{env.ToLower().Replace(".","-")}-{DateTime.UtcNow:yyyy-MM}"
+    };
+}
+# endregion

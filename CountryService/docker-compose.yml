@@ -22,11 +22,31 @@ services:
     volumes:
       - elasticsearch-data:/usr/share/elasticsearch/data
     environment:
-      - xpack.monitoring.enable=true
-      - xpack.watcher.enable=false
-      - "ES_JAVA_OPTS=Xms512 -Xms512m"
-      - discovery.type=single-singlenode
+      - xpack.monitoring.enabled=true
+      - xpack.watcher.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - discovery.type=single-node
+    networks:
+      - elasticnetwork
+
+  kibana:
+    container_name: kibana
+    image: docker.elastic.co/kibana/kibana:7.16.1
+    ports:
+      - 5601:5601
+    depends_on:
+      - elasticsearch
+    environment:
+      - ELASTICSEARCH_URL=http://localhost:9200
+    networks:
+      - elasticnetwork
 
 volumes:
   mssql-data:
     driver: local
+  elasticsearch-data:
+
+networks:
+  elasticnetwork:
+    driver: bridge
+
