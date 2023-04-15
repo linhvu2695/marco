@@ -2,16 +2,19 @@
 
 using CountryService.Models;
 using Microsoft.EntityFrameworkCore;
+using Nest;
 
 namespace CountryService.Data
 {
     public class CountryRepo : ICountryRepo
     {
         private readonly AppDbContext _context;
+        private readonly IElasticClient _elasticClient;
 
-        public CountryRepo(AppDbContext context)
+        public CountryRepo(AppDbContext context, IElasticClient elasticClient)
         {
             _context = context;
+            _elasticClient = elasticClient;
         }
 
         public bool CountryExists(int countryId)
@@ -27,6 +30,7 @@ namespace CountryService.Data
             } 
 
             _context.Countries.Add(c);
+            // TODO: add to ES
         }
 
         public void DeleteCountry(Country country)

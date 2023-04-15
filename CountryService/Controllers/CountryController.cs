@@ -6,6 +6,7 @@ using CountryService.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using Nest;
 
 namespace CountryService.Controllers
 {
@@ -13,23 +14,26 @@ namespace CountryService.Controllers
     [ApiController]
     public class CountryController : ControllerBase
     {
+        private readonly IConfiguration _configuration;
         private readonly ICountryRepo _countryRepo;
         private readonly ICityRepo _cityRepo;
         private readonly IMapper _mapper;
         private readonly ILogger<CountryController> _logger;
+        private readonly IElasticClient _elasticClient;
 
-        public CountryController(ICountryRepo countryRepo, ICityRepo cityRepo, IMapper mapper, ILogger<CountryController> logger)
+        public CountryController(IConfiguration configuration, ICountryRepo countryRepo, ICityRepo cityRepo, IMapper mapper, ILogger<CountryController> logger, IElasticClient elasticClient)
         {
+            _configuration = configuration;
             _countryRepo = countryRepo;
             _cityRepo = cityRepo;
             _mapper = mapper;
             _logger = logger;
+            _elasticClient = elasticClient;
         }
 
         [HttpGet]
         public ActionResult<IEnumerable<CountryReadDto>> GetCountries()
         {
-            System.Console.WriteLine("--> Getting Countries...");
             _logger.LogInformation("--> Getting Countries...", DateTime.UtcNow);
             
             var countryItem = _countryRepo.GetAllCountries();
@@ -40,7 +44,7 @@ namespace CountryService.Controllers
         [HttpGet("{id}", Name="GetCountryById")]
         public ActionResult<CountryReadDto> GetCountryById(int id)
         {
-            System.Console.WriteLine("---> Getting Country by Id...");
+            _logger.LogInformation("--> Getting Country by Id...", DateTime.UtcNow);
 
             var countryItem = _countryRepo.GetCountryById(id);
 
@@ -54,7 +58,7 @@ namespace CountryService.Controllers
         [HttpGet("{id}/city")]
         public ActionResult<IEnumerable<CityReadDto>> GetCitiesFromCountry(int id)
         {
-            System.Console.WriteLine($"---> Getting Cities from Country {id}...");
+            _logger.LogInformation($"--> Getting Cities from Country {id}...", DateTime.UtcNow);
 
             if (!_countryRepo.CountryExists(id))
             {
@@ -81,7 +85,7 @@ namespace CountryService.Controllers
         [HttpDelete("{id}")]
         public ActionResult DeleteCountry(int id)
         {
-            System.Console.WriteLine($"--> Deleting Country with ID: {id}...");
+            _logger.LogInformation($"--> Deleting Country with ID: {id}...", DateTime.UtcNow);
 
             var countryItem = _countryRepo.GetCountryById(id);
             if (countryItem == null)
@@ -102,7 +106,37 @@ namespace CountryService.Controllers
                 }
             }
 
+            // Delete record from ElasticSearch
+            _elasticClient.Delete<Country>(id, c => c.Index(_configuration["ELKConfiguration:index"]));
+
             return NoContent();
+        }
+
+        [HttpGet("query")]
+        public async Task<IActionResult> Search(string keyword)
+        {
+            // Search ElasticSearch
+            _logger.LogInformation($"--> Searching with keyword: {keyword}...", DateTime.UtcNow);
+            var results = await _elasticClient.SearchAsync<Country>(
+                s => s.Query(
+                    q => q.QueryString(
+                        d => d.Query('*'+keyword+'*')
+                    )
+                ).Size(1000)
+            );
+            var resultIds = results.Documents.Select(c => c.Id).ToList();
+
+            // Search database
+            List<Country> resultCountries = new List<Country>();
+            foreach(int id in resultIds)
+            {
+                var countryItem = _countryRepo.GetCountryById(id);
+                if (countryItem != null)
+                {
+                    resultCountries.Add(countryItem);
+                }
+            }
+            return Ok(resultCountries);
         }
     }
 }

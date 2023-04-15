@@ -60,6 +60,10 @@
               "target": "Package",
               "version": "[7.0.4, )"
             },
+            "NEST": {
+              "target": "Package",
+              "version": "[7.17.5, )"
+            },
             "Serilog.AspNetCore": {
               "target": "Package",
               "version": "[6.1.0, )"

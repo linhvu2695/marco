@@ -15,17 +15,19 @@ namespace CountryService.Controllers
     {
         private readonly ICityRepo _repository;
         private readonly IMapper _mapper;
+        private readonly ILogger<CityController> _logger;
 
-        public CityController(ICityRepo countryRepo, IMapper mapper)
+        public CityController(ICityRepo countryRepo, IMapper mapper, ILogger<CityController> logger)
         {
             _repository = countryRepo;
             _mapper = mapper;
+            _logger = logger;
         }
 
         [HttpGet]
         public ActionResult<IEnumerable<CityReadDto>> GetCities()
         {
-            System.Console.WriteLine("--> Getting Cities...");
+            _logger.LogInformation("--> Getting Cities...", DateTime.UtcNow);
             
             var cityItem = _repository.GetAllCities();
 
@@ -35,7 +37,7 @@ namespace CountryService.Controllers
         [HttpGet("{id}", Name="GetCityById")]
         public ActionResult<CountryReadDto> GetCityById(int id)
         {
-            System.Console.WriteLine("---> Getting City by Id...");
+            _logger.LogInformation("---> Getting City by Id...", DateTime.UtcNow);
 
             var cityItem = _repository.GetCityById(id);
 
@@ -49,7 +51,7 @@ namespace CountryService.Controllers
         [HttpPost]
         public ActionResult<CityCreateDto> CreateCity(CityCreateDto cityCreateDto)
         {
-            System.Console.WriteLine("---> Creating City...");
+            _logger.LogInformation("---> Creating City...", DateTime.UtcNow);
 
             var cityModel = _mapper.Map<City>(cityCreateDto);
             _repository.CreateCity(cityModel);
@@ -62,7 +64,7 @@ namespace CountryService.Controllers
         [HttpDelete("{id}")]
         public ActionResult DeleteCity(int id)
         {
-            System.Console.WriteLine($"--> Deleting City with ID: {id}...");
+            _logger.LogInformation($"--> Deleting City with ID: {id}...", DateTime.UtcNow);
 
             var cityItem = _repository.GetCityById(id);
             if (cityItem == null)
@@ -72,7 +74,7 @@ namespace CountryService.Controllers
 
             _repository.DeleteCity(cityItem);
             _repository.SaveChanges();
-            
+
             return NoContent();
         }
     }

@@ -91,3 +91,4 @@
 /Users/vlinh/Code/personal/projects/microservices/marco/CountryService/bin/Debug/net7.0/Serilog.Sinks.Elasticsearch.dll
 /Users/vlinh/Code/personal/projects/microservices/marco/CountryService/bin/Debug/net7.0/Serilog.Sinks.File.dll
 /Users/vlinh/Code/personal/projects/microservices/marco/CountryService/bin/Debug/net7.0/Serilog.Sinks.PeriodicBatching.dll
+/Users/vlinh/Code/personal/projects/microservices/marco/CountryService/bin/Debug/net7.0/Nest.dll

@@ -13,6 +13,8 @@ namespace CountryService.Models
         [Required]
         public string Name { get; set; }
 
+        public string OfficialName { get; set; }
+
         public int Population { get; set; }
 
         public HashSet<City> Cities { get; set; }

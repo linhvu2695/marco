@@ -2,6 +2,7 @@
 
 using System.Reflection;
 using CountryService.Data;
+using CountryService.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Serilog.Exceptions;
@@ -17,6 +18,8 @@ builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 ConfigureLogs();
 builder.Host.UseSerilog();
+
+builder.Services.AddElasticSearch(builder.Configuration);
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

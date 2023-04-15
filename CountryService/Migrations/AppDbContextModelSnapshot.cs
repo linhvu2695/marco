@@ -59,6 +59,9 @@ namespace CountryService.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("OfficialName")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("Population")
                         .HasColumnType("int");
 

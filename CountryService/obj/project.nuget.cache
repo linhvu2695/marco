@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "AWb5eng4QeK9yXuMdcsQfMWuG6h9eg17VYLPDEBtNP/P4DRjOOGbwuLN1uy1v0GGK7ZwJ7m1iZIycdy7i5jcFA==",
+  "dgSpecHash": "FPlK6RoTSv4XBsUx0QGwGm6+tUWO1rQ/qmXQyo7EqdkUURWJXI5gdRnixn3BT4twa1ftNhaUwOZNAb1Vl6nBUA==",
   "success": true,
   "projectFilePath": "/Users/vlinh/Code/personal/projects/microservices/marco/CountryService/CountryService.csproj",
   "expectedPackageFiles": [
@@ -52,6 +52,7 @@
     "/Users/vlinh/.nuget/packages/microsoft.win32.registry/5.0.0/microsoft.win32.registry.5.0.0.nupkg.sha512",
     "/Users/vlinh/.nuget/packages/microsoft.win32.systemevents/5.0.0/microsoft.win32.systemevents.5.0.0.nupkg.sha512",
     "/Users/vlinh/.nuget/packages/mono.texttemplating/2.2.1/mono.texttemplating.2.2.1.nupkg.sha512",
+    "/Users/vlinh/.nuget/packages/nest/7.17.5/nest.7.17.5.nupkg.sha512",
     "/Users/vlinh/.nuget/packages/serilog/2.12.0/serilog.2.12.0.nupkg.sha512",
     "/Users/vlinh/.nuget/packages/serilog.aspnetcore/6.1.0/serilog.aspnetcore.6.1.0.nupkg.sha512",
     "/Users/vlinh/.nuget/packages/serilog.enrichers.environment/2.2.0/serilog.enrichers.environment.2.2.0.nupkg.sha512",
