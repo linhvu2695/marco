@@ -112,6 +112,23 @@ namespace CountryService.Controllers
             return NoContent();
         }
 
+        [HttpPut("{id}/population")]
+        public ActionResult UpdateCountryPopulation (int id, CountryUpdatePopulationDto countryUpdatePopulationDto)
+        {
+            System.Console.WriteLine($"---> Updating Population at Country {id}...");
+
+            var countryItem = _countryRepo.GetCountryById(id);
+            if (countryItem == null)
+            {
+                return NotFound();
+            }
+
+            _countryRepo.UpdateCountryPopulation(id, countryUpdatePopulationDto.Population);
+            _countryRepo.SaveChanges();
+            
+            return NoContent();
+        }
+
         [HttpGet("query")]
         public async Task<IActionResult> Search(string keyword)
         {
@@ -120,7 +137,7 @@ namespace CountryService.Controllers
             var results = await _elasticClient.SearchAsync<Country>(
                 s => s.Query(
                     q => q.QueryString(
-                        d => d.Query('*'+keyword+'*')
+                        d => d.Query(keyword)
                     )
                 ).Size(1000)
             );

@@ -59,9 +59,10 @@ namespace CountryService.Data
             return _context.SaveChanges() >= 0;
         }
 
-        public void UpdateCountry(Country country)
+        public void UpdateCountryPopulation(int countryId, int updatedPopulation)
         {
-            throw new NotImplementedException();
+            var countryItem = _context.Countries.FirstOrDefault(c => c.Id == countryId);
+            countryItem.Population = updatedPopulation;
         }
     }
 }

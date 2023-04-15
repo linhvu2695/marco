@@ -18,6 +18,6 @@ namespace CountryService.Data
 
         void DeleteCountry(Country country);
 
-        void UpdateCountry(Country country);
+        void UpdateCountryPopulation(int countryId, int updatedPopulation);
     }
 }
