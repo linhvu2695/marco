@@ -30,7 +30,6 @@ namespace CountryService.Data
             } 
 
             _context.Countries.Add(c);
-            // TODO: add to ES
         }
 
         public void DeleteCountry(Country country)
@@ -52,6 +51,11 @@ namespace CountryService.Data
         public Country? GetCountryById(int id)
         {
             return _context.Countries.FirstOrDefault(c => c.Id == id);
+        }
+
+        public Country? GetCountryByName(string name)
+        {
+            return _context.Countries.FirstOrDefault(c => c.Name == name);
         }
 
         public bool SaveChanges()

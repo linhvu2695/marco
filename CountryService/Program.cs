@@ -3,6 +3,7 @@
 using System.Reflection;
 using CountryService.Data;
 using CountryService.Extensions;
+using CountryService.Services;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Serilog.Exceptions;
@@ -15,6 +16,7 @@ builder.Services.AddDbContext<AppDbContext>(opt => opt.UseSqlServer(builder.Conf
 builder.Services.AddScoped<ICountryRepo, CountryRepo>();
 builder.Services.AddScoped<ICityRepo, CityRepo>();
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+builder.Services.AddScoped<ICacheService, CacheService>();
 
 ConfigureLogs();
 builder.Host.UseSerilog();

@@ -103,6 +103,17 @@ namespace CountryService.Data
                 context.SaveChanges();
                 elasticClient.Index(china, i => i.Index(defaultIndex).Id(china.Id)); 
 
+                // Cuba
+                var cuba = new Models.Country() {
+                    Name = "Cuba",
+                    OfficialName = "Republic of Cuba",
+                    Population = (int)(11.34 * MILLION),
+                    Cities = new HashSet<Models.City>()
+                };
+                context.Countries.Add(cuba);   
+                context.SaveChanges();
+                elasticClient.Index(cuba, i => i.Index(defaultIndex).Id(cuba.Id)); 
+
                 context.SaveChanges();
             }
             else

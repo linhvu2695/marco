@@ -41,6 +41,12 @@ services:
     networks:
       - elasticnetwork
 
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+
+
 volumes:
   mssql-data:
     driver: local
