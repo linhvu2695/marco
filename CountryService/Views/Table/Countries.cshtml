@@ -1,0 +1,68 @@
+@using Microsoft.AspNetCore.Html
+@model IEnumerable<Country>
+@{
+    ViewData["Title"] = "Countries";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Marco Polo</h1>
+</div>
+
+<div class="container p-3">
+    <div class="row pt-4">
+        <div class="col-6">
+            <h2 class="text-primary">Countries List</h2>
+		</div>
+    </div>
+</div>
+
+<table class="table table-bordered table-striped" style="width:100%" id="countryTable">
+    <thead>
+        <tr>
+            <th>
+                Country Name
+            </th>
+            <th>
+                Official Name
+            </th>
+            <th>
+                Country Code
+            </th>
+            <th>
+                Population
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var country in Model)
+        {
+            <tr>
+                <td>
+                    @country.Name
+                </td>
+                <td>
+                    @country.OfficialName
+                </td>
+                <td>
+                    @country.CountryCode
+                </td>
+                <td>
+                    @(country.Population == 0 ? new HtmlString("NA") : country.Population.ToString("#,##0"))
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@section scripts {
+    <script src="https://cdn.datatables.net/1.11.4/js/jquery.dataTables.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('#countryTable').DataTable({
+                paging: true,
+                ordering: false,
+                searching: true
+            });
+        });
+    </script>
+}

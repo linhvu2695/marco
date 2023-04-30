@@ -1,0 +1,26 @@
+@model Puzzle
+@{
+    ViewData["Title"] = "Marco";
+}
+
+<div class="container h-100">
+    <div class="row text-center align-items-center h-100">
+        <div class="mx-auto container">
+            <div class="m-5">
+                <p>@Model.Question</p>
+            </div>
+            <div class="m-5">
+                <p id="answer" class="answer">Answer: <strong>@Model.Answer</strong></p>
+                <button class="btn btn-lg btn-primary" onclick="$('#answer').show(); $(this).hide();">Show Answer</button>
+            </div>
+            <div class="m-5">
+                <button class="btn btn-lg btn-outline-light" onclick="window.location.reload();">Next Question</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+

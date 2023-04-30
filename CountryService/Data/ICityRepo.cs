@@ -10,6 +10,8 @@ namespace CountryService.Data
 
         City? GetCityById(int id);
 
+        Country? GetCountryByCityId(int cityId);
+
         void CreateCity(City c);
 
         bool CityExists(int cityId);

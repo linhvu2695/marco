@@ -23,8 +23,7 @@ namespace CountryService.Controllers
         private readonly IElasticClient _elasticClient;
         private readonly ICacheService _cacheService;
 
-        public const string CONFIG_INDEX = "ELKConfiguration:index";
-        public const int TIME_CACHE_EXPIRY_SECONDS = 30;
+        public const int TIME_CACHE_EXPIRY_SECONDS = 60;
 
         public CountryController(IConfiguration configuration, ICountryRepo countryRepo, ICityRepo cityRepo, IMapper mapper, ILogger<CountryController> logger, IElasticClient elasticClient, ICacheService cacheService)
         {
@@ -109,7 +108,7 @@ namespace CountryService.Controllers
             _countryRepo.SaveChanges();
 
             // Index record to ElasticSearch
-            _elasticClient.Index(countryModel, c => c.Index(_configuration[CONFIG_INDEX]).Id(countryModel.Id));
+            _elasticClient.Index(countryModel, c => c.Index(_configuration[Configurations.Const.CONFIG_INDEX_NAME]).Id(countryModel.Id));
 
             // Set cache
             _cacheService.SetData<Country>(countryModel.Name, countryModel, DateTimeOffset.Now.AddSeconds(TIME_CACHE_EXPIRY_SECONDS));
@@ -136,14 +135,14 @@ namespace CountryService.Controllers
             }
             catch (DbUpdateException ex) 
             {
-                if (ex.InnerException is SqlException sqlException && sqlException.Number == Exceptions.SQL_EXCEPTION_CODE_FOREIGN_KEY_CONSTRAINT_VIOLATION)
+                if (ex.InnerException is SqlException sqlException && sqlException.Number == Exceptions.Const.SQL_EXCEPTION_CODE_FOREIGN_KEY_CONSTRAINT_VIOLATION)
                 {
-                    return Conflict(Messages.MESSAGE_DELETE_COUNTRY_CONFLICT);
+                    return Conflict(Messages.Const.MESSAGE_DELETE_COUNTRY_CONFLICT);
                 }
             }
 
             // Delete record from ElasticSearch
-            _elasticClient.Delete<Country>(id, c => c.Index(_configuration[CONFIG_INDEX]));
+            _elasticClient.Delete<Country>(id, c => c.Index(_configuration[Configurations.Const.CONFIG_INDEX_NAME]));
 
             // Invalidate cache
             _cacheService.RemoveData(countryItem.Name);

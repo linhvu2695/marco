@@ -58,6 +58,11 @@ namespace CountryService.Data
             return _context.Countries.FirstOrDefault(c => c.Name == name);
         }
 
+        public Country? GetCountryByCountryCode(string countryCode)
+        {
+            return _context.Countries.FirstOrDefault(c => c.CountryCode == countryCode);
+        }
+
         public bool SaveChanges()
         {
             return _context.SaveChanges() >= 0;

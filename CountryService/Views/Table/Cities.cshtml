@@ -1,0 +1,56 @@
+@using Microsoft.AspNetCore.Html
+@model IEnumerable<City>
+@{
+    ViewData["Title"] = "Cities";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Marco Polo</h1>
+</div>
+
+<div class="container p-3">
+    <div class="row pt-4">
+        <div class="col-6">
+            <h2 class="text-primary">Cities List</h2>
+		</div>
+    </div>
+</div>
+
+<table class="table table-bordered table-striped" style="width:100%" id="cityTable">
+    <thead>
+        <tr>
+            <th>
+                City
+            </th>
+            <th>
+                Population
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var city in Model)
+        {
+            <tr>
+                <td>
+                    @city.Name
+                </td>
+                <td>
+                    @(city.Population == 0 ? new HtmlString("NA") : city.Population.ToString("#,##0"))
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@section scripts {
+    <script src="https://cdn.datatables.net/1.11.4/js/jquery.dataTables.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('#cityTable').DataTable({
+                paging: true,
+                ordering: false,
+                searching: true
+            });
+        });
+    </script>
+}

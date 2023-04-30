@@ -12,6 +12,8 @@ namespace CountryService.Data
 
         Country? GetCountryByName(string name);
 
+        Country? GetCountryByCountryCode(string countryCode);
+
         IEnumerable<City> GetCitiesFromCountry(int countryId);
 
         void CreateCountry(Country c);

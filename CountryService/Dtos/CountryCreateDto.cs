@@ -8,6 +8,7 @@ namespace CountryService.Dtos
     {
         public string Name { get; set; }
         public string OfficialName { get; set; }
+        public string CountryCode { get; set; }
         public int Population { get; set; }
     }
 }

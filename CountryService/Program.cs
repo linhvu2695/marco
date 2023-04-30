@@ -23,7 +23,11 @@ builder.Host.UseSerilog();
 
 builder.Services.AddElasticSearch(builder.Configuration);
 
-builder.Services.AddControllers();
+builder.Services.AddControllersWithViews();
+
+// CSS isolation for MVC would not work if RazorRuntimeCompilation is enabled
+// builder.Services.AddRazorPages().AddRazorRuntimeCompilation();
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -38,10 +42,16 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseStaticFiles();
+
+app.UseRouting();
 
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Home}/{action=Index}/{id?}");
 
 PrepDb.PrepPopulation(app);
 

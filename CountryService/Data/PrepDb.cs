@@ -1,8 +1,13 @@
 #nullable disable
 
+using CountryService.Constants;
+using CountryService.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.VisualBasic.FileIO;
 using Nest;
+using Newtonsoft.Json.Linq;
 using Serilog;
+using FieldType = Microsoft.VisualBasic.FileIO.FieldType;
 
 namespace CountryService.Data
 {
@@ -10,20 +15,20 @@ namespace CountryService.Data
     {
         public const int MILLION = 1000 * 1000;
         public const int BILLION = 1000 * 1000 * 1000;
+        public const string PATH_CITIES_DATA = "Data/cities.csv";
     
         public static void PrepPopulation(IApplicationBuilder app)
         {
-            using(var serviceScope = app.ApplicationServices.CreateScope())
-            {
-                SeedData(
-                    serviceScope.ServiceProvider.GetService<AppDbContext>(), 
-                    serviceScope.ServiceProvider.GetService<IElasticClient>(),
-                    serviceScope.ServiceProvider.GetService<IConfiguration>()
-                );
-            }
+            var serviceScope = app.ApplicationServices.CreateScope();
+
+            SeedData(
+                serviceScope.ServiceProvider.GetService<AppDbContext>(), 
+                serviceScope.ServiceProvider.GetService<IElasticClient>(),
+                serviceScope.ServiceProvider.GetService<IConfiguration>()
+            );
         }
 
-        private static void SeedData(AppDbContext context, IElasticClient elasticClient, IConfiguration configuration)
+        private static async void SeedData(AppDbContext context, IElasticClient elasticClient, IConfiguration configuration)
         {
             Log.Logger.Information("--> Applying Migrations...");
             try
@@ -33,93 +38,103 @@ namespace CountryService.Data
             catch (Exception ex) {
                 Log.Logger.Warning($"--> Could not run migrations: {ex.Message}");
             }
-            var defaultIndex = configuration["ELKConfiguration:index"];
+            var defaultIndex = configuration[Configurations.Const.CONFIG_INDEX_NAME];
+            var restCountriesApiUrl = configuration[Configurations.Const.CONFIG_REST_COUNTRIES_API_URL];
+
+            var httpClient = new HttpClient();
+            HttpResponseMessage response;
             
             if (!context.Countries.Any()) {
-                Log.Logger.Information("--> Seeding data...");
+                Log.Logger.Information("--> Seeding Countries data...");
 
-                // Vietnam
-                var hanoi = new Models.City() {
-                    Name = "Hanoi",
-                    Population = (int)(8.331 * MILLION)
-                };
-                context.Cities.Add(hanoi);
+                // Fetch data from external API
+                response = await httpClient.GetAsync(restCountriesApiUrl);
 
-                var hochiminhCity = new Models.City() {
-                    Name = "Ho Chi Minh City",
-                    Population = (int)(8.993 * MILLION)
-                };
-                context.Cities.Add(hochiminhCity);
+                if (response.IsSuccessStatusCode)
+                {
+                    var stringContent = await response.Content.ReadAsStringAsync();
+                    JArray countries = JArray.Parse(stringContent);
 
-                var vietnam = new Models.Country() {
-                    Name = "Vietnam",
-                    OfficialName = "Socialist Republic of Vietnam",
-                    Population = (int)(95.54 * MILLION),
-                    Cities = new HashSet<Models.City>()
-                };
-                vietnam.Cities.Add(hanoi);
-                vietnam.Cities.Add(hochiminhCity);
-                context.Countries.Add(vietnam); 
+                    foreach (JObject country in countries)
+                    {
+                        Country countryModel = new Country();
+                        countryModel.Name = (string)country["name"]["common"];
+                        countryModel.OfficialName = (string)country["name"]["official"];
+                        countryModel.CountryCode = (string)country["cca2"];
+                        countryModel.Population = (int)country["population"];
+                        context.Countries.Add(countryModel); 
+                        context.SaveChanges();
+                        elasticClient.Index(countryModel, i => i.Index(defaultIndex).Id(countryModel.Id));
+                        Log.Logger.Information($"--> Country saved: {countryModel.Name}, {countryModel.OfficialName}, {countryModel.Population}", DateTime.UtcNow);
+                    }
+                }
                 context.SaveChanges();
-                elasticClient.Index(vietnam, i => i.Index(defaultIndex).Id(vietnam.Id));
-
-                // Russia
-                var moscow = new Models.City() {
-                    Name = "Moscow",
-                    Population = (int) (13.01 * MILLION)
-                };
-                context.Cities.Add(moscow);
-
-                var russia = new Models.Country() {
-                    Name = "Russia",
-                    OfficialName = "Russian Federation",
-                    Population = (int)(144.3 * MILLION),
-                    Cities = new HashSet<Models.City>()
-                };              
-                russia.Cities.Add(moscow);   
-                context.Countries.Add(russia); 
-                context.SaveChanges();
-                elasticClient.Index(russia, i => i.Index(defaultIndex).Id(russia.Id));
-
-                // USA
-                var usa = new Models.Country() {
-                    Name = "USA",
-                    OfficialName = "United States of America",
-                    Population = (int)(326.7 * MILLION),
-                    Cities = new HashSet<Models.City>()
-                };
-                context.Countries.Add(usa);   
-                context.SaveChanges();
-                elasticClient.Index(usa, i => i.Index(defaultIndex).Id(usa.Id)); 
-
-                // China
-                var china = new Models.Country() {
-                    Name = "China",
-                    OfficialName = "People's Republic of China",
-                    Population = (int)(1.393 * BILLION),
-                    Cities = new HashSet<Models.City>()
-                };
-                context.Countries.Add(china);   
-                context.SaveChanges();
-                elasticClient.Index(china, i => i.Index(defaultIndex).Id(china.Id)); 
-
-                // Cuba
-                var cuba = new Models.Country() {
-                    Name = "Cuba",
-                    OfficialName = "Republic of Cuba",
-                    Population = (int)(11.34 * MILLION),
-                    Cities = new HashSet<Models.City>()
-                };
-                context.Countries.Add(cuba);   
-                context.SaveChanges();
-                elasticClient.Index(cuba, i => i.Index(defaultIndex).Id(cuba.Id)); 
-
-                context.SaveChanges();
+                Log.Logger.Information("--> Countries data Fetching process completed");
             }
             else
             {
-                Log.Logger.Information("--> Data already populated");
+                Log.Logger.Information("--> Country data already populated");
             }
+
+            if (!context.Cities.Any())
+            {
+                Log.Logger.Information("--> Seeding Cities data...");
+                using (TextFieldParser parser = new TextFieldParser(PATH_CITIES_DATA))
+                {
+                    parser.TextFieldType = FieldType.Delimited;
+                    parser.SetDelimiters(",");
+                    while (!parser.EndOfData)
+                    {
+                        string[] cities = parser.ReadFields();
+                        foreach (string city in cities)
+                        {
+                            if (!String.IsNullOrWhiteSpace(city))
+                            {
+                                await SeedCity(city, context, configuration);
+                            }
+                        }
+                    }
+                }
+                Log.Logger.Information("--> Cities data Fetching process completed");
+            }
+            else
+            {
+                Log.Logger.Information("--> Cities data already populated");
+            }
+        }
+
+        private async static Task SeedCity(string cityName, AppDbContext context, IConfiguration configuration)
+        {
+            System.Console.WriteLine($"Seeding city {cityName}");
+            var apiNinjasKey = configuration[Configurations.Const.CONFIG_API_NINJAS_KEY];
+            var cityApiUrl = configuration[Configurations.Const.CONFIG_API_NINJAS_CITY_URL];
+
+            var httpClient = new HttpClient();
+            HttpResponseMessage response;
+
+            httpClient.DefaultRequestHeaders.Add("X-Api-Key", apiNinjasKey);
+            response = await httpClient.GetAsync( cityApiUrl + "?name=" + cityName);
+            var stringContent = await response.Content.ReadAsStringAsync();
+            JArray cities = JArray.Parse(stringContent);
+            JToken city = new JObject();
+
+            if (cities != null && cities.Count() > 0)
+            {
+                city = cities.First;
+                City cityModel = new City();
+                cityModel.Name = (string)city["name"];
+                cityModel.Population = city["population"]?.Value<int>() ?? 0;
+
+                var countryModel = context.Countries.Include(c => c.Cities).FirstOrDefault<Country>(c => c.CountryCode == (string)city["country"]);
+                if (countryModel != null) 
+                {
+                    countryModel.Cities.Add(cityModel);
+                    context.Cities.Add(cityModel);
+                    context.SaveChanges();
+                    Log.Logger.Information($"--> City saved: {cityModel.Name}, {cityModel.Population}, {countryModel.Name}", DateTime.UtcNow);
+                }
+            }
+
         }
     }
 }
