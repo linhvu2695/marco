@@ -1,4 +1,5 @@
 using AutoMapper;
+using AwsS3.Services;
 using CountryService.Constants;
 using CountryService.Data;
 using CountryService.Dtos;
@@ -22,10 +23,11 @@ namespace CountryService.Controllers
         private readonly ILogger<CountryController> _logger;
         private readonly IElasticClient _elasticClient;
         private readonly ICacheService _cacheService;
+        private readonly IStorageService _storageService;
 
         public const int TIME_CACHE_EXPIRY_SECONDS = 60;
 
-        public CountryController(IConfiguration configuration, ICountryRepo countryRepo, ICityRepo cityRepo, IMapper mapper, ILogger<CountryController> logger, IElasticClient elasticClient, ICacheService cacheService)
+        public CountryController(IConfiguration configuration, ICountryRepo countryRepo, ICityRepo cityRepo, IMapper mapper, ILogger<CountryController> logger, IElasticClient elasticClient, ICacheService cacheService, IStorageService storageService)
         {
             _configuration = configuration;
             _countryRepo = countryRepo;
@@ -34,6 +36,7 @@ namespace CountryService.Controllers
             _logger = logger;
             _elasticClient = elasticClient;
             _cacheService = cacheService;
+            _storageService = storageService;
         }
 
         [HttpGet]

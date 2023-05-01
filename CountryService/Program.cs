@@ -1,6 +1,7 @@
 #nullable disable
 
 using System.Reflection;
+using AwsS3.Services;
 using CountryService.Data;
 using CountryService.Extensions;
 using CountryService.Services;
@@ -17,6 +18,7 @@ builder.Services.AddScoped<ICountryRepo, CountryRepo>();
 builder.Services.AddScoped<ICityRepo, CityRepo>();
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddScoped<ICacheService, CacheService>();
+builder.Services.AddScoped<IStorageService, StorageService>();
 
 ConfigureLogs();
 builder.Host.UseSerilog();

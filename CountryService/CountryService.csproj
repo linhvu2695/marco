@@ -29,5 +29,8 @@
     <PackageReference Include="StackExchange.Redis" Version="2.6.104" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\AwsS3\AwsS3.csproj" />
+  </ItemGroup>
 
 </Project>

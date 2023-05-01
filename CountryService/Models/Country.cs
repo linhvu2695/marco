@@ -19,6 +19,10 @@ namespace CountryService.Models
 
         public int Population { get; set; }
 
+        public string FlagPermalink { get; set; }
+
+        public string FlagDescription { get; set; }
+
         public HashSet<City> Cities { get; set; }
     }
 }
