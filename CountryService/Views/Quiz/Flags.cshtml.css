@@ -1,0 +1,58 @@
+/* Body Styles */
+
+p {
+    font-family: var(--bs-body-font-family);
+    font-size: 2em;
+    font-weight: 200;
+    margin: 0;
+}
+
+/* Container Styles */
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+/* Button Styles */
+.btn {
+    padding: 10px 20px;
+    font-size: 18px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.btn-primary {
+    background-color: #007bff;
+    border-color: #007bff;
+    color: #fff;
+}
+
+.btn-outline-light {
+    background-color: #007bff;
+    border-color: #007bff;
+    color: #fff;
+}
+
+/* Answer Styles */
+#answer {
+    display: none;
+}
+
+#answer.show {
+    display: block;
+    margin-top: 10px;
+    font-size: 24px;
+    font-weight: bold;
+    color: #007bff;
+}
+
+img {
+    box-shadow: 0px 0px 5px #888888;
+  }
+
+

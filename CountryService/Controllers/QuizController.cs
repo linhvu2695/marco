@@ -17,9 +17,9 @@ namespace CountryService.Controllers
             _logger = logger;
         }
 
-        public IActionResult Index()
+        public IActionResult Cities()
         {
-            _logger.LogInformation("--> Viewing Index");
+            _logger.LogInformation("--> Viewing Cities quiz");
 
             List<City> oCities = _cityRepo.GetAllCities().ToList();
             var random = new Random();
@@ -30,13 +30,29 @@ namespace CountryService.Controllers
             do
             {
                 randomCity = oCities[random.Next(oCities.Count)];
-                question = $"In which country is {randomCity.Name}";
+                question = $"In which country is {randomCity.Name}?";
                 var country = _cityRepo.GetCountryByCityId(randomCity.Id);
                 answer = country?.Name;
             } while (answer == null);
             Puzzle puzzle = new Puzzle(question, answer);
 
             return View(puzzle);
+        }
+
+        public IActionResult Flags()
+        {
+            _logger.LogInformation("--> Viewing Flags quiz");
+
+            List<Country> oCountries = _countryRepo.GetAllCountries().ToList();
+            var random = new Random();
+            Country randomCountry;
+            String question = "This flag belongs to which country?";
+
+            randomCountry = oCountries[random.Next(oCountries.Count)];
+            var answer = randomCountry.Name;
+            Puzzle flagPuzzle = new FlagPuzzle(question, answer, randomCountry.FlagPermalink);
+            
+            return View(flagPuzzle);
         }
     }
 }
