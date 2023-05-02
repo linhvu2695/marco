@@ -13,9 +13,15 @@ namespace CountryService.Models
         [Required]
         public string Name { get; set; }
 
+        public HashSet<City> Cities { get; set; }
+
+        public string Name_Official { get; set; }
+
+        public string Name_Chinese { get; set; }
+
         public string CountryCode { get; set; }
 
-        public string OfficialName { get; set; }
+        public string CountryCodeA3 { get; set; }
 
         public int Population { get; set; }
 
@@ -23,6 +29,14 @@ namespace CountryService.Models
 
         public string FlagDescription { get; set; }
 
-        public HashSet<City> Cities { get; set; }
+        public string Region { get; set; }
+
+        public string Subregion { get; set; }
+
+        public double Area { get; set; }
+
+        public string CoatOfArmsPermalink { get; set; }
+
+        public string Languages { get; set; }
     }
 }

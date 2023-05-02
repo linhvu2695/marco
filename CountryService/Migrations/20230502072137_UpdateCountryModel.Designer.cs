@@ -4,6 +4,7 @@ using CountryService.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CountryService.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230502072137_UpdateCountryModel")]
+    partial class UpdateCountryModel
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -73,14 +76,14 @@ namespace CountryService.Migrations
                     b.Property<string>("FlagPermalink")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Languages")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name_Chinese")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name_Native")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name_Official")

@@ -1,0 +1,96 @@
+@using Microsoft.AspNetCore.Html
+@model Country
+@{
+    ViewData["Title"] = "Marco";
+}
+
+<div class="row" ng-cloak>
+    <div class="col-md-12">
+        <h1>@Model.Name</h1>
+    </div>
+</div>
+<div class="row" ng-cloak>
+    <div class="col-md-4">
+        <h3>Names</h3>
+        <div class="table-responsive">
+            <table class="table table-bordered">
+                <tbody>
+                    <tr>
+                        <th>Common</th>
+                        <td>@Model.Name</td>
+                    </tr>
+                    <tr>
+                        <th>Official</th>
+                        <td>@Model.Name_Official</td>
+                    </tr>
+                    <tr>
+                        <th>Chinese</th>
+                        <td>@Model.Name_Chinese</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <h3>Codes</h3>
+        <div class="table-reponsive">
+            <table class="table table-bordered">
+                <tr>
+                    <th>ISO 3166-1 Alpha-2</th>
+                    <td>@Model.CountryCode</td>
+                </tr>
+                <tr>
+                    <th>ISO 3166-1 Alpha-3</th>
+                    <td>@Model.CountryCodeA3</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <h3>Language</h3>
+        <div class="table-responsive">
+            <table class="table table-bordered">
+                <tbody>
+                    @foreach (string lang in Model.Languages.Split(' '))
+                    {
+                        <tr>
+                            <td>@lang</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>/
+        </div>
+
+        <h3>Geography</h3>
+        <div class="table-responsive">
+            <table class="table table-bordered">
+                <tbody>
+                    <tr>
+                        <th>Region</th>
+                        <td>@Model.Region</td>
+                    </tr>
+                    <tr>
+                        <th>Subregion</th>
+                        <td>@Model.Subregion</td>
+                    </tr>
+                    <tr>
+                        <th>Area</th>
+                        <td>
+                            <span>@(Model.Area == 0 ? new HtmlString("-") : Model.Area.ToString("#,##0")) km&#178;</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Population</th>
+                        <td>
+                            <span>@(Model.Population == 0 ? new HtmlString("-") : Model.Population.ToString("#,##0"))</span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="col-md-4 fake-heading">
+        <img src=@Model.FlagPermalink alt="The flag of @Model.Name" class="img-responsive country-flag">
+    </div>
+</div>

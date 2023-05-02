@@ -30,5 +30,10 @@ namespace CountryService.Controllers
             IEnumerable<City> oCities = _cityRepo.GetAllCities();
             return View(oCities);
         }
+
+        public IActionResult CountryDetail(int countryId)
+        {
+            return View(_countryRepo.GetCountryById(countryId));
+        }
     }
 }

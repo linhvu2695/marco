@@ -31,6 +31,9 @@
             <th>
                 Population
             </th>
+            <th>
+                Region
+            </th>
         </tr>
     </thead>
     <tbody>
@@ -38,16 +41,19 @@
         {
             <tr>
                 <td>
-                    @country.Name
+                    <a asp-controller="Table" asp-action="CountryDetail" asp-route-countryId=@country.Id>@country.Name</a>
                 </td>
                 <td>
-                    @country.OfficialName
+                    @country.Name_Official
                 </td>
                 <td>
                     @country.CountryCode
                 </td>
                 <td>
                     @(country.Population == 0 ? new HtmlString("NA") : country.Population.ToString("#,##0"))
+                </td>
+                <td>
+                    @country.Region
                 </td>
             </tr>
         }

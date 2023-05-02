@@ -1,6 +1,9 @@
+using System.Text;
+using CountryService.Constants;
 using CountryService.Data;
 using CountryService.Models;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json.Linq;
 
 namespace CountryService.Controllers
 {
@@ -9,12 +12,14 @@ namespace CountryService.Controllers
         private readonly ICountryRepo _countryRepo;
         private readonly ICityRepo _cityRepo;
         private readonly ILogger<QuizController> _logger;
+        private readonly IConfiguration _configuration;
 
-        public QuizController(ICountryRepo countryRepo, ICityRepo cityRepo, ILogger<QuizController> logger)
+        public QuizController(ICountryRepo countryRepo, ICityRepo cityRepo, ILogger<QuizController> logger, IConfiguration configuration)
         {
             _countryRepo = countryRepo;
             _cityRepo = cityRepo;
             _logger = logger;
+            _configuration = configuration;
         }
 
         public IActionResult Cities()
