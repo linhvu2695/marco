@@ -6,3 +6,6 @@ k8s
 bin
 spare
 obj
+.gitsecret/keys/random_seed
+!*.secret
+CountryService/appsettings.Development.json
