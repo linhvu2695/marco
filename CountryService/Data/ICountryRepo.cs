@@ -8,7 +8,7 @@ namespace CountryService.Data
 
         IEnumerable<Country> GetAllCountries();
 
-        Country? GetCountryById(int id);
+        Country? GetCountryById(int id, bool includeCity = false);
 
         Country? GetCountryByName(string name);
 

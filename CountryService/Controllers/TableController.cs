@@ -33,7 +33,7 @@ namespace CountryService.Controllers
 
         public IActionResult CountryDetail(int countryId)
         {
-            return View(_countryRepo.GetCountryById(countryId));
+            return View(_countryRepo.GetCountryById(countryId, true));
         }
     }
 }

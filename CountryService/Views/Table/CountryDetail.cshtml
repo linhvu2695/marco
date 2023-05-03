@@ -44,6 +44,20 @@
                 </tr>
             </table>
         </div>
+
+        <h3>Cities</h3>
+        <div class="table-responsive">
+            <table class="table table-bordered">
+                <tbody>
+                    @foreach (City city in Model.Cities)
+                    {
+                        <tr>
+                            <td>@city.Name</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
     </div>
     
     <div class="col-md-4">
@@ -58,7 +72,7 @@
                         </tr>
                     }
                 </tbody>
-            </table>/
+            </table>
         </div>
 
         <h3>Geography</h3>
@@ -92,5 +106,9 @@
 
     <div class="col-md-4 fake-heading">
         <img src=@Model.FlagPermalink alt="The flag of @Model.Name" class="img-responsive country-flag">
+        @if (!string.IsNullOrEmpty(Model.CoatOfArmsPermalink))
+        {
+            <img src="@Model.CoatOfArmsPermalink" alt="The Coat of Arms of @Model.Name" class="img-responsive country-coatofarms">
+        }
     </div>
 </div>

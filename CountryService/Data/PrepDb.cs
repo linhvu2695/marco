@@ -92,6 +92,7 @@ namespace CountryService.Data
                     if (countryModel == null)
                     {
                         bAddNewCountry = true;
+                        countryModel = new Country();
                     }
 
                     countryModel.Name = countryName;
@@ -130,35 +131,33 @@ namespace CountryService.Data
 
         private async static Task SeedCities(AppDbContext context, IConfiguration configuration)
         {
-            if (!context.Cities.Any())
+            
+            Log.Logger.Information("--> Seeding Cities data...");
+            using (TextFieldParser parser = new TextFieldParser(PATH_CITIES_DATA))
             {
-                Log.Logger.Information("--> Seeding Cities data...");
-                using (TextFieldParser parser = new TextFieldParser(PATH_CITIES_DATA))
+                parser.TextFieldType = FieldType.Delimited;
+                parser.SetDelimiters(",");
+                while (!parser.EndOfData)
                 {
-                    parser.TextFieldType = FieldType.Delimited;
-                    parser.SetDelimiters(",");
-                    while (!parser.EndOfData)
+                    string[] cities = parser.ReadFields();
+                    foreach (string city in cities.Distinct())
                     {
-                        string[] cities = parser.ReadFields();
-                        foreach (string city in cities.Distinct())
+                        if (!String.IsNullOrWhiteSpace(city))
                         {
-                            if (!String.IsNullOrWhiteSpace(city))
-                            {
-                                await SeedCity(city, context, configuration);
-                            }
+                            await SeedCity(city, context, configuration);
                         }
                     }
                 }
-                Log.Logger.Information("--> Cities data Fetching process completed");
             }
-            else
-            {
-                Log.Logger.Information("--> Cities data already populated");
-            }
+            Log.Logger.Information("--> Cities data Fetching process completed");
         }
 
         private async static Task SeedCity(string cityName, AppDbContext context, IConfiguration configuration)
         {
+            if (context.Cities.FirstOrDefault(c => c.Name == cityName) != null)
+            {
+                return;
+            }
             Log.Logger.Information($"--> Seeding city {cityName}");
             var apiNinjasKey = configuration[Configurations.Const.CONFIG_API_NINJAS_KEY];
             var cityApiUrl = configuration[Configurations.Const.CONFIG_API_NINJAS_CITY_URL];
@@ -180,7 +179,10 @@ namespace CountryService.Data
                 cityModel.Population = city["population"]?.Value<int>() ?? 0;
 
                 var countryModel = context.Countries.Include(c => c.Cities).FirstOrDefault<Country>(c => c.CountryCode == (string)city["country"]);
-                if (countryModel != null) 
+
+                // Add city if it belongs to a country in DB and
+                // it has not been added before (the search name and result name of a city can be different)
+                if (countryModel != null && context.Cities.FirstOrDefault(c => c.Name == cityModel.Name) == null) 
                 {
                     countryModel.Cities.Add(cityModel);
                     context.Cities.Add(cityModel);
@@ -188,7 +190,6 @@ namespace CountryService.Data
                     Log.Logger.Information($"--> City saved: {cityModel.Name}, {cityModel.Population}, {countryModel.Name}", DateTime.UtcNow);
                 }
             }
-
         }
     
         private async static Task SeedFlags(IStorageService storageService, IConfiguration configuration)

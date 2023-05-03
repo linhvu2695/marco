@@ -48,9 +48,16 @@ namespace CountryService.Data
             return countryItem.Cities;
         }
 
-        public Country? GetCountryById(int id)
+        public Country? GetCountryById(int id, bool includeCities)
         {
-            return _context.Countries.FirstOrDefault(c => c.Id == id);
+            if (includeCities)
+            {
+                return _context.Countries.Include(c => c.Cities).FirstOrDefault(c => c.Id == id);
+            }
+            else
+            {
+                return _context.Countries.FirstOrDefault(c => c.Id == id);
+            }
         }
 
         public Country? GetCountryByName(string name)
