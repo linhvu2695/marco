@@ -6,6 +6,7 @@ using CountryService.Data;
 using CountryService.Extensions;
 using CountryService.Services;
 using Microsoft.EntityFrameworkCore;
+using Prometheus;
 using Serilog;
 using Serilog.Exceptions;
 using Serilog.Sinks.Elasticsearch;
@@ -47,9 +48,10 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
-
+app.UseHttpMetrics();
 app.UseAuthorization();
 
+app.MapMetrics();
 app.MapControllers();
 app.MapControllerRoute(
     name: "default",
