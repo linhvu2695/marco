@@ -8,13 +8,13 @@ namespace CountryService.Data
 
         IEnumerable<Country> GetAllCountries();
 
-        Country? GetCountryById(int id, bool includeCity = false);
+        Country? GetCountryById(int id);
 
         Country? GetCountryByName(string name);
 
         Country? GetCountryByCountryCode(string countryCode);
 
-        IEnumerable<City> GetCitiesFromCountry(int countryId);
+        Country_DbBO? GetCountryDbBOById(int id);
 
         void CreateCountry(Country c);
 

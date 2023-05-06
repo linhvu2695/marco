@@ -177,14 +177,20 @@ namespace CountryService.Data
                 City cityModel = new City();
                 cityModel.Name = (string)city["name"];
                 cityModel.Population = city["population"]?.Value<int>() ?? 0;
+                cityModel.Latitude = city["latitude"]?.Value<double>() ?? 0;
+                cityModel.Longitude = city["longitude"]?.Value<double>() ?? 0;
+                if (bool.TryParse((string)city["is_capital"], out bool isCapital))
+                {
+                    cityModel.IsCapital = isCapital;
+                }
 
-                var countryModel = context.Countries.Include(c => c.Cities).FirstOrDefault<Country>(c => c.CountryCode == (string)city["country"]);
+                var countryModel = context.Countries.FirstOrDefault<Country>(c => c.CountryCode == (string)city["country"]);
+                cityModel.CountryId = countryModel.Id;
 
                 // Add city if it belongs to a country in DB and
                 // it has not been added before (the search name and result name of a city can be different)
                 if (countryModel != null && context.Cities.FirstOrDefault(c => c.Name == cityModel.Name) == null) 
                 {
-                    countryModel.Cities.Add(cityModel);
                     context.Cities.Add(cityModel);
                     context.SaveChanges();
                     Log.Logger.Information($"--> City saved: {cityModel.Name}, {cityModel.Population}, {countryModel.Name}", DateTime.UtcNow);

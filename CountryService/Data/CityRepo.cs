@@ -47,28 +47,13 @@ namespace CountryService.Data
 
         public Country GetCountryByCityId(int cityId)
         {
-            // Retrieve CountryId
-            int countryId = 0;
-            String sQuery = $"SELECT CountryId FROM Cities WHERE Id = {cityId}";
-            using (var command = _context.Database.GetDbConnection().CreateCommand())
-            {
-                command.CommandText = sQuery;
-                command.CommandType = CommandType.Text;
-                _context.Database.OpenConnection();
-                using (var result = command.ExecuteReader())
-                {
-                    while (result.Read())
-                    {
-                        countryId = result.GetInt32(0);
-                    }
-                }
-            }
+            City city = GetCityById(cityId);
+            return _context.Countries.FirstOrDefault(c => c.Id == city.CountryId);
+        }
 
-            if (countryId != 0)
-            {
-                return _context.Countries.FirstOrDefault(c => c.Id == countryId);
-            }
-            return null;
+        public IEnumerable<City> GetCitiesFromCountry(int countryId)
+        {
+            return _context.Cities.Where(c => c.CountryId == countryId).ToList();
         }
 
         public bool SaveChanges()

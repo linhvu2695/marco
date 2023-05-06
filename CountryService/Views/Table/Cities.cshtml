@@ -25,6 +25,12 @@
             <th>
                 Population
             </th>
+            <th>
+                Latitude
+            </th>
+            <th>
+                Longitude
+            </th>
         </tr>
     </thead>
     <tbody>
@@ -36,6 +42,12 @@
                 </td>
                 <td>
                     @(city.Population == 0 ? new HtmlString("NA") : city.Population.ToString("#,##0"))
+                </td>
+                <td>
+                    @city.Latitude
+                </td>
+                <td>
+                    @city.Longitude
                 </td>
             </tr>
         }

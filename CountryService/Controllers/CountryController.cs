@@ -97,7 +97,7 @@ namespace CountryService.Controllers
                 return NotFound();
             }
 
-            var cities = _countryRepo.GetCitiesFromCountry(id);
+            var cities = _cityRepo.GetCitiesFromCountry(id);
             return Ok(_mapper.Map<IEnumerable<CityReadDto>>(cities));
         }
 

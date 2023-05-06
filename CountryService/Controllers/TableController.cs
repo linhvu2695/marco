@@ -33,7 +33,9 @@ namespace CountryService.Controllers
 
         public IActionResult CountryDetail(int countryId)
         {
-            return View(_countryRepo.GetCountryById(countryId, true));
+            Country_DbBO? country_DbBO = _countryRepo.GetCountryDbBOById(countryId);
+            return View(country_DbBO);
+            // TODOL return Error View if countryModel == null
         }
     }
 }

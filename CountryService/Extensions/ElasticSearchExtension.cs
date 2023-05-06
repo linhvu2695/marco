@@ -26,8 +26,7 @@ namespace CountryService.Extensions
         private static void AddDefaultMappings(ConnectionSettings settings)
         {
             settings.DefaultMappingFor<Country>(c => c
-                .Ignore(x => x.Population)
-                .Ignore(x => x.Cities));
+                .Ignore(x => x.Population));
         }
 
         private static void CreateIndex(ElasticClient client, string indexName)

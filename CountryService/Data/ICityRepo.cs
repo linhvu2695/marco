@@ -12,6 +12,8 @@ namespace CountryService.Data
 
         Country? GetCountryByCityId(int cityId);
 
+        IEnumerable<City> GetCitiesFromCountry(int countryId);
+
         void CreateCity(City c);
 
         bool CityExists(int cityId);

@@ -42,22 +42,9 @@ namespace CountryService.Data
             return _context.Countries.ToList();
         }
 
-        public IEnumerable<City> GetCitiesFromCountry(int countryId)
+        public Country? GetCountryById(int id)
         {
-            var countryItem = _context.Countries.Include(c => c.Cities).FirstOrDefault(c => c.Id == countryId);
-            return countryItem.Cities;
-        }
-
-        public Country? GetCountryById(int id, bool includeCities)
-        {
-            if (includeCities)
-            {
-                return _context.Countries.Include(c => c.Cities).FirstOrDefault(c => c.Id == id);
-            }
-            else
-            {
-                return _context.Countries.FirstOrDefault(c => c.Id == id);
-            }
+            return _context.Countries.FirstOrDefault(c => c.Id == id);
         }
 
         public Country? GetCountryByName(string name)
@@ -67,7 +54,30 @@ namespace CountryService.Data
 
         public Country? GetCountryByCountryCode(string countryCode)
         {
+            if (countryCode.Length < 2 || countryCode.Length > 3)
+            {
+                return null;
+            }
+
+            if (countryCode.Length == 3)
+            {
+                return _context.Countries.FirstOrDefault(c => c.CountryCodeA3 == countryCode);
+            }
             return _context.Countries.FirstOrDefault(c => c.CountryCode == countryCode);
+        }
+
+        public Country_DbBO? GetCountryDbBOById(int id)
+        {
+            Country country = GetCountryById(id);
+            if (country == null)
+            {
+                return null;
+            }
+            
+            Country_DbBO country_DbBO = new Country_DbBO();
+            country_DbBO.Country = country;
+            country_DbBO.Cities = _context.Cities.Where(c => c.CountryId == country_DbBO.Country.Id).ToList();
+            return country_DbBO;
         }
 
         public bool SaveChanges()
