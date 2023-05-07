@@ -2,10 +2,11 @@
 
 using Microsoft.EntityFrameworkCore;
 using CountryService.Models;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
 namespace CountryService.Data
 {
-    public class AppDbContext : DbContext
+    public class AppDbContext : IdentityDbContext
     {
         public AppDbContext(DbContextOptions<AppDbContext> opt) : base(opt)
         {

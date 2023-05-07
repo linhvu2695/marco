@@ -1,11 +1,16 @@
 #nullable disable
 
 using System.Reflection;
+using System.Text;
 using AwsS3.Services;
+using CountryService.Constants;
 using CountryService.Data;
 using CountryService.Extensions;
 using CountryService.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Prometheus;
 using Serilog;
 using Serilog.Exceptions;
@@ -20,6 +25,30 @@ builder.Services.AddScoped<ICityRepo, CityRepo>();
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddScoped<ICacheService, CacheService>();
 builder.Services.AddScoped<IStorageService, StorageService>();
+
+
+// Authentication
+builder.Services.AddAuthentication(options => 
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+}).AddJwtBearer(jwt => 
+{
+    var key = Encoding.ASCII.GetBytes(builder.Configuration.GetSection(ConnStringKeys.Const.CONFIG_JWT_SECRET).Value);
+    jwt.SaveToken = true;
+    jwt.TokenValidationParameters = new TokenValidationParameters()
+    {
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = new SymmetricSecurityKey(key),
+        ValidateIssuer = false,
+        ValidateAudience = false,
+        RequireExpirationTime = false,
+        ValidateLifetime = true
+    };
+});
+builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = false)
+    .AddEntityFrameworkStores<AppDbContext>();
 
 ConfigureLogs();
 builder.Host.UseSerilog();
@@ -49,6 +78,7 @@ app.UseStaticFiles();
 
 app.UseRouting();
 app.UseHttpMetrics();
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapMetrics();

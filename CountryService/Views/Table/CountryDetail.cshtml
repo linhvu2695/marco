@@ -52,7 +52,7 @@
                     @foreach (City city in Model.Cities)
                     {
                         <tr>
-                            <td>@city.Name</td>
+                            <td>@if (city.IsCapital) {<b>@city.Name</b>} else { @city.Name }</td>
                         </tr>
                     }
                 </tbody>

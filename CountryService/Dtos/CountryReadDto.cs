@@ -1,7 +1,5 @@
 #nullable disable
 
-using CountryService.Models;
-
 namespace CountryService.Dtos
 {
     public class CountryReadDto
