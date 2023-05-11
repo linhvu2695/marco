@@ -12,6 +12,10 @@ namespace CountryService.Constants
             public const string CONFIG_JWT = "JwtConfiguration";
             public const string CONFIG_JWT_SECRET = CONFIG_JWT + ":Secret";
 
+            public const string CONFIG_EMAIL = "EmailConfiguration";
+            public const string CONFIG_EMAIL_API_KEY = CONFIG_EMAIL + ":ApiKey";
+            public const string CONFIG_EMAIL_DOMAIN = CONFIG_EMAIL + ":Domain";
+
             public const string CONFIG_ELK  = "ELKConfiguration";
             public const string CONFIG_INDEX_NAME = CONFIG_ELK + ":index";
 
