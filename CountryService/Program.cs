@@ -27,7 +27,18 @@ builder.Services.AddScoped<ICacheService, CacheService>();
 builder.Services.AddScoped<IStorageService, StorageService>();
 
 
-// Authentication
+# region Authentication
+var key = Encoding.ASCII.GetBytes(builder.Configuration.GetSection(ConnStringKeys.Const.CONFIG_JWT_SECRET).Value);
+var tokenValidationParameters = new TokenValidationParameters(){
+    ValidateIssuerSigningKey = true,
+    IssuerSigningKey = new SymmetricSecurityKey(key),
+    ValidateIssuer = false,
+    ValidateAudience = false,
+    RequireExpirationTime = false,
+    ValidateLifetime = true
+};
+builder.Services.AddSingleton(tokenValidationParameters);
+
 builder.Services.AddAuthentication(options => 
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -35,20 +46,13 @@ builder.Services.AddAuthentication(options =>
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
 }).AddJwtBearer(jwt => 
 {
-    var key = Encoding.ASCII.GetBytes(builder.Configuration.GetSection(ConnStringKeys.Const.CONFIG_JWT_SECRET).Value);
     jwt.SaveToken = true;
-    jwt.TokenValidationParameters = new TokenValidationParameters()
-    {
-        ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new SymmetricSecurityKey(key),
-        ValidateIssuer = false,
-        ValidateAudience = false,
-        RequireExpirationTime = false,
-        ValidateLifetime = true
-    };
+    jwt.TokenValidationParameters = tokenValidationParameters;
 });
 builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = false)
     .AddEntityFrameworkStores<AppDbContext>();
+# endregion
+
 
 ConfigureLogs();
 builder.Host.UseSerilog();

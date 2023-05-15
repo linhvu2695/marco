@@ -143,7 +143,7 @@ namespace CountryService.Controllers
             {
                 if (ex.InnerException is SqlException sqlException && sqlException.Number == Exceptions.Const.SQL_EXCEPTION_CODE_FOREIGN_KEY_CONSTRAINT_VIOLATION)
                 {
-                    return Conflict(Messages.Const.MESSAGE_DELETE_COUNTRY_CONFLICT);
+                    return Conflict("Cannot delete country because it is associated with a city.");
                 }
             }
 
