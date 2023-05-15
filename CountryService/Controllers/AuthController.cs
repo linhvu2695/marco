@@ -4,10 +4,13 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using CountryService.Constants;
+using CountryService.Data;
 using CountryService.Dtos;
+using CountryService.Global;
 using CountryService.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using RestSharp;
 using RestSharp.Authenticators;
@@ -21,14 +24,18 @@ namespace CountryService.Controllers
         private readonly UserManager<IdentityUser> _userManager;
         private readonly IConfiguration _configuration;
         private readonly ILogger<AuthController> _logger;
+        private readonly AppDbContext _context;
+        private readonly TokenValidationParameters _tokenValidationParameters;
 
         private const string TAG_URL = "#URL#";
 
-        public AuthController(UserManager<IdentityUser> userManager, IConfiguration configuration, ILogger<AuthController> logger)
+        public AuthController(UserManager<IdentityUser> userManager, IConfiguration configuration, ILogger<AuthController> logger, AppDbContext context, TokenValidationParameters tokenValidationParameters)
         {
             _userManager = userManager;
             _configuration = configuration;
             _logger = logger;
+            _context = context;
+            _tokenValidationParameters = tokenValidationParameters;
         }
 
         [HttpPost]
@@ -199,15 +206,145 @@ namespace CountryService.Controllers
             }
 
             // Generate JWT Token
-            string token = GenerateToken(existingUser);
-            return Ok(new AuthResult()
-            {
-                Result = true,
-                Token = token
-            });
+            var genTokenResult = await GenerateJwtToken(existingUser);
+            return Ok(genTokenResult);
         }
 
-        private string GenerateToken(IdentityUser user)
+        [HttpPost]
+        [Route("RefreshToken")]
+        public async Task<IActionResult> RefreshToken([FromBody] TokenRequestDto tokenRequest)
+        {
+            if(!ModelState.IsValid)
+            {
+                return BadRequest(new AuthResult()
+                {
+                    Result = false,
+                    Errors = new List<string>()
+                    {
+                        "Invalid parameters"
+                    }
+                });
+            }
+
+            var result = await VerifyAndGenerateToken(tokenRequest);
+            if (result == null)
+            {
+                return BadRequest(new AuthResult()
+                {
+                    Result = false,
+                    Errors = new List<string>()
+                    {
+                        "Invalid tokens"
+                    }
+                });
+            }
+            return Ok(result);
+        }
+
+        private async Task<AuthResult> VerifyAndGenerateToken(TokenRequestDto tokenRequest)
+        {
+            var jwtTokenHandler = new JwtSecurityTokenHandler();
+
+            try
+            {
+                // Verify JWT Token
+                _tokenValidationParameters.ValidateLifetime = false;
+                var tokenInVerification = jwtTokenHandler.ValidateToken(tokenRequest.Token, _tokenValidationParameters, out var validatedToken);
+
+                if (!(validatedToken is JwtSecurityToken jwtSecurityToken)) return null;
+                var result = jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase);
+                if (result == false) return null;
+
+                // Check JWT token expiry time
+                var utcExpiryDate = long.Parse(tokenInVerification.Claims.FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Exp).Value);
+                var expiryDate = DateTimeTools.UnixTimeStampToDateTime(utcExpiryDate);
+                System.Console.WriteLine(expiryDate);
+                System.Console.WriteLine(DateTime.UtcNow);
+                if (expiryDate > DateTime.UtcNow)
+                {
+                    return new AuthResult()
+                    {
+                        Result = false,
+                        Errors = new List<string>()
+                        {
+                            "JWT Token not yet expired"
+                        }
+                    };
+                }
+                
+                // Check refresh token
+                var storedToken = await _context.RefreshTokens.FirstOrDefaultAsync(x => x.Token == tokenRequest.RefreshToken);
+                if (storedToken == null)
+                {
+                    return new AuthResult()
+                    {
+                        Result = false,
+                        Errors = new List<string>()
+                        {
+                            "Invalid Token"
+                        }
+                    };
+                }
+                if (storedToken.IsRevoked)
+                {
+                    return new AuthResult()
+                    {
+                        Result = false,
+                        Errors = new List<string>()
+                        {
+                            "Invalid Token"
+                        }
+                    };
+                }
+
+                // Check Refresh token expiry JwtId
+                var jti = tokenInVerification.Claims.FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Jti).Value;
+                if (jti != storedToken.JwtId)
+                {
+                    return new AuthResult()
+                    {
+                        Result = false,
+                        Errors = new List<string>()
+                        {
+                            "Invalid Token"
+                        }
+                    };
+                }
+
+                // Check Refresh token expiry time
+                if (storedToken.ExpiryDate < DateTime.UtcNow)
+                {
+                    return new AuthResult()
+                    {
+                        Result = false,
+                        Errors = new List<string>()
+                        {
+                            "Expired Token"
+                        }
+                    };
+                }
+
+                storedToken.IsUsed = true;
+                _context.RefreshTokens.Update(storedToken);
+                await _context.SaveChangesAsync();
+
+                var dbUser = await _userManager.FindByIdAsync(storedToken.UserId);
+                return await GenerateJwtToken(dbUser);
+            }
+            catch (Exception ex)
+            {
+                return new AuthResult()
+                    {
+                        Result = false,
+                        Errors = new List<string>()
+                        {
+                            "Server Error"
+                        }
+                    };
+            }
+        }
+
+        private async Task<AuthResult> GenerateJwtToken(IdentityUser user)
         {
             var jwtTokenHandler = new JwtSecurityTokenHandler();
 
@@ -224,12 +361,32 @@ namespace CountryService.Controllers
                     new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                     new Claim(JwtRegisteredClaimNames.Iat, DateTime.Now.ToUniversalTime().ToString())
                 }),
-                Expires = DateTime.Now.AddHours(1),
+                Expires = DateTime.UtcNow.Add(TimeSpan.Parse(_configuration[ConnStringKeys.Const.CONFIG_JWT_EXPIRY_TIME])),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256)
             };
 
             var token = jwtTokenHandler.CreateToken(tokenDescriptor);
-            return jwtTokenHandler.WriteToken(token);
+            var jwtToken = jwtTokenHandler.WriteToken(token);
+
+            var refreshToken = new RefreshToken()
+            {
+                JwtId = token.Id,
+                Token = RandomStringGeneration(23),
+                AddedDate = DateTime.UtcNow,
+                ExpiryDate = DateTime.UtcNow.AddMonths(6),
+                IsRevoked = false,
+                IsUsed = false,
+                UserId = user.Id
+            };
+            await _context.RefreshTokens.AddAsync(refreshToken);
+            await _context.SaveChangesAsync();
+
+            return new AuthResult()
+            {
+                Result = true,
+                Token = jwtToken,
+                RefreshToken = refreshToken.Token
+            };
         }
 
         private bool SendEmail(string body, string receiverEmail)
@@ -254,6 +411,13 @@ namespace CountryService.Controllers
             var response = client.Execute(request);
             _logger.LogInformation($"Email API response: {response.Content}", DateTime.UtcNow);
             return response.IsSuccessful;
+        }
+
+        private string RandomStringGeneration(int length)
+        {
+            var random = new Random();
+            var chars = ConstStrings.Const.ALPHANUMERIC_CHARS;
+            return new string(Enumerable.Repeat(chars, length).Select(s => s[random.Next(s.Length)]).ToArray());
         }
     }
 }

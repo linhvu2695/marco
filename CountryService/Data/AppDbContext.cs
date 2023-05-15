@@ -16,5 +16,7 @@ namespace CountryService.Data
         public DbSet<Country> Countries { get; set; }
 
         public DbSet<City> Cities { get; set; }
+
+        public DbSet<RefreshToken> RefreshTokens { get; set; }
     }
 }
