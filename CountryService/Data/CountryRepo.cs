@@ -1,7 +1,6 @@
 #nullable disable
 
 using CountryService.Models;
-using Microsoft.EntityFrameworkCore;
 using Nest;
 
 namespace CountryService.Data

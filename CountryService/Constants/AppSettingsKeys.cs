@@ -1,6 +1,6 @@
 namespace CountryService.Constants
 {
-    public class Configurations
+    public class AppSettingsKeys
     {
         public class Const
         {
@@ -8,6 +8,10 @@ namespace CountryService.Constants
             public const string CONFIG_SEEDING_COUNTRIES = CONFIG_SEEDING + ":Countries";
             public const string CONFIG_SEEDING_CITIES = CONFIG_SEEDING + ":Cities";
             public const string CONFIG_SEEDING_FLAGS = CONFIG_SEEDING + ":Flags";
+
+            public const string CONFIG_EMAIL = "EmailConfiguration";
+            public const string CONFIG_EMAIL_API_KEY = CONFIG_EMAIL + ":ApiKey";
+            public const string CONFIG_EMAIL_DOMAIN = CONFIG_EMAIL + ":Domain";
 
             public const string CONFIG_ELK  = "ELKConfiguration";
             public const string CONFIG_INDEX_NAME = CONFIG_ELK + ":index";

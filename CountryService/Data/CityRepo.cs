@@ -2,7 +2,6 @@
 
 using System.Data;
 using CountryService.Models;
-using Microsoft.EntityFrameworkCore;
 
 namespace CountryService.Data
 {

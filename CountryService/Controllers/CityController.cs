@@ -2,10 +2,7 @@ using AutoMapper;
 using CountryService.Data;
 using CountryService.Dtos;
 using CountryService.Models;
-using CountryService.Constants;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Data.SqlClient;
-using Microsoft.EntityFrameworkCore;
 
 namespace CountryService.Controllers
 {
