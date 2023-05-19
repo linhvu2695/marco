@@ -1,21 +1,13 @@
 namespace CountryService.Constants
 {
-    public static class ConnStringKeys
+    public class Configurations
     {
-        public static class Const
+        public class Const
         {
             public const string CONFIG_SEEDING = "SeedingConfiguration";
             public const string CONFIG_SEEDING_COUNTRIES = CONFIG_SEEDING + ":Countries";
             public const string CONFIG_SEEDING_CITIES = CONFIG_SEEDING + ":Cities";
             public const string CONFIG_SEEDING_FLAGS = CONFIG_SEEDING + ":Flags";
-
-            public const string CONFIG_JWT = "JwtConfiguration";
-            public const string CONFIG_JWT_SECRET = CONFIG_JWT + ":Secret";
-            public const string CONFIG_JWT_EXPIRY_TIME = CONFIG_JWT + ":ExpiryTimeFrame";
-
-            public const string CONFIG_EMAIL = "EmailConfiguration";
-            public const string CONFIG_EMAIL_API_KEY = CONFIG_EMAIL + ":ApiKey";
-            public const string CONFIG_EMAIL_DOMAIN = CONFIG_EMAIL + ":Domain";
 
             public const string CONFIG_ELK  = "ELKConfiguration";
             public const string CONFIG_INDEX_NAME = CONFIG_ELK + ":index";

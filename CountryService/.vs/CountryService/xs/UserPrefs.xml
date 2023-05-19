@@ -4,9 +4,11 @@
     <BreakpointStore />
   </MonoDevelop.Ide.DebuggingService.Breakpoints>
   <MonoDevelop.Ide.ItemProperties.CountryService PreferredExecutionTarget="/Applications/Google Chrome.app" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Migrations/20230507120902_AddIdentityData.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Views/Home/Index.cshtml">
     <Files>
-      <File FileName="Migrations/20230507120902_AddIdentityData.cs" Line="1" Column="1" />
+      <File FileName="Controllers/CountryController.cs" Line="127" Column="14" />
+      <File FileName="Controllers/HomeController.cs" Line="1" Column="1" />
+      <File FileName="Views/Home/Index.cshtml" Line="10" Column="1" />
     </Files>
     <Pads>
       <Pad Id="ProjectPad">
@@ -14,9 +16,10 @@
           <Node name="CountryService" expanded="True">
             <Node name="CountryService" expanded="True">
               <Node name="Controllers" expanded="True" />
-              <Node name="Migrations" expanded="True" />
               <Node name="Views" expanded="True">
-                <Node name="Home" expanded="True" />
+                <Node name="Home" expanded="True">
+                  <Node name="Index.cshtml" selected="True" />
+                </Node>
                 <Node name="Shared" expanded="True" />
               </Node>
             </Node>
