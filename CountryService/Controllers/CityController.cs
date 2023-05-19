@@ -2,7 +2,10 @@ using AutoMapper;
 using CountryService.Data;
 using CountryService.Dtos;
 using CountryService.Models;
+using CountryService.Constants;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 
 namespace CountryService.Controllers
 {
@@ -34,7 +37,7 @@ namespace CountryService.Controllers
         [HttpGet("{id}", Name="GetCityById")]
         public ActionResult<CountryReadDto> GetCityById(int id)
         {
-            _logger.LogInformation("--> Getting City by Id...", DateTime.UtcNow);
+            _logger.LogInformation("---> Getting City by Id...", DateTime.UtcNow);
 
             var cityItem = _repository.GetCityById(id);
 
@@ -48,7 +51,7 @@ namespace CountryService.Controllers
         [HttpPost]
         public ActionResult<CityCreateDto> CreateCity(CityCreateDto cityCreateDto)
         {
-            _logger.LogInformation("--> Creating City...", DateTime.UtcNow);
+            _logger.LogInformation("---> Creating City...", DateTime.UtcNow);
 
             var cityModel = _mapper.Map<City>(cityCreateDto);
             _repository.CreateCity(cityModel);

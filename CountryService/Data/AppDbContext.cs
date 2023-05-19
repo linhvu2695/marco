@@ -2,11 +2,10 @@
 
 using Microsoft.EntityFrameworkCore;
 using CountryService.Models;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
 namespace CountryService.Data
 {
-    public class AppDbContext : IdentityDbContext
+    public class AppDbContext : DbContext
     {
         public AppDbContext(DbContextOptions<AppDbContext> opt) : base(opt)
         {
@@ -16,7 +15,5 @@ namespace CountryService.Data
         public DbSet<Country> Countries { get; set; }
 
         public DbSet<City> Cities { get; set; }
-
-        public DbSet<RefreshToken> RefreshTokens { get; set; }
     }
 }

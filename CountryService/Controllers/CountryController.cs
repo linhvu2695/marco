@@ -1,5 +1,6 @@
 using AutoMapper;
 using AwsS3.Services;
+using CountryService.Constants;
 using CountryService.Data;
 using CountryService.Dtos;
 using CountryService.Models;
@@ -8,13 +9,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Nest;
-using CountryService.Constants;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 namespace CountryService.Controllers
 {
-    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [Route("api/[controller]")]
     [ApiController]
     public class CountryController : ControllerBase
@@ -114,7 +111,7 @@ namespace CountryService.Controllers
             _countryRepo.SaveChanges();
 
             // Index record to ElasticSearch
-            _elasticClient.Index(countryModel, c => c.Index(_configuration[ConnStringKeys.Const.CONFIG_INDEX_NAME]).Id(countryModel.Id));
+            _elasticClient.Index(countryModel, c => c.Index(_configuration[Configurations.Const.CONFIG_INDEX_NAME]).Id(countryModel.Id));
 
             // Set cache
             _cacheService.SetData<Country>(countryModel.Name, countryModel, DateTimeOffset.Now.AddSeconds(TIME_CACHE_EXPIRY_SECONDS));
@@ -143,12 +140,12 @@ namespace CountryService.Controllers
             {
                 if (ex.InnerException is SqlException sqlException && sqlException.Number == Exceptions.Const.SQL_EXCEPTION_CODE_FOREIGN_KEY_CONSTRAINT_VIOLATION)
                 {
-                    return Conflict("Cannot delete country because it is associated with a city.");
+                    return Conflict(Messages.Const.MESSAGE_DELETE_COUNTRY_CONFLICT);
                 }
             }
 
             // Delete record from ElasticSearch
-            _elasticClient.Delete<Country>(id, c => c.Index(_configuration[ConnStringKeys.Const.CONFIG_INDEX_NAME]));
+            _elasticClient.Delete<Country>(id, c => c.Index(_configuration[Configurations.Const.CONFIG_INDEX_NAME]));
 
             // Invalidate cache
             _cacheService.RemoveData(countryItem.Name);
