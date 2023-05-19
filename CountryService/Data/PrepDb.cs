@@ -48,17 +48,17 @@ namespace CountryService.Data
                 Log.Logger.Warning($"--> Could not run migrations: {ex.Message}");
             }
             
-            if (bool.Parse(configuration[Configurations.Const.CONFIG_SEEDING_COUNTRIES]))
+            if (bool.Parse(configuration[AppSettingsKeys.Const.CONFIG_SEEDING_COUNTRIES]))
             {
                 await SeedCountries(context, elasticClient, configuration);
             }
             
-            if (bool.Parse(configuration[Configurations.Const.CONFIG_SEEDING_CITIES]))
+            if (bool.Parse(configuration[AppSettingsKeys.Const.CONFIG_SEEDING_CITIES]))
             {
                 await SeedCities(context, configuration);
             }
             
-            if (bool.Parse(configuration[Configurations.Const.CONFIG_SEEDING_FLAGS]))
+            if (bool.Parse(configuration[AppSettingsKeys.Const.CONFIG_SEEDING_FLAGS]))
             {
                 await SeedFlags(storageService, configuration);
             }
@@ -66,8 +66,8 @@ namespace CountryService.Data
 
         private async static Task SeedCountries(AppDbContext context, IElasticClient elasticClient, IConfiguration configuration)
         {
-            var defaultIndex = configuration[Configurations.Const.CONFIG_INDEX_NAME];
-            var restCountriesApiUrl = configuration[Configurations.Const.CONFIG_REST_COUNTRIES_API_URL];
+            var defaultIndex = configuration[AppSettingsKeys.Const.CONFIG_INDEX_NAME];
+            var restCountriesApiUrl = configuration[AppSettingsKeys.Const.CONFIG_REST_COUNTRIES_API_URL];
 
             var httpClient = new HttpClient();
             HttpResponseMessage response;
@@ -159,8 +159,8 @@ namespace CountryService.Data
                 return;
             }
             Log.Logger.Information($"--> Seeding city {cityName}");
-            var apiNinjasKey = configuration[Configurations.Const.CONFIG_API_NINJAS_KEY];
-            var cityApiUrl = configuration[Configurations.Const.CONFIG_API_NINJAS_CITY_URL];
+            var apiNinjasKey = configuration[AppSettingsKeys.Const.CONFIG_API_NINJAS_KEY];
+            var cityApiUrl = configuration[AppSettingsKeys.Const.CONFIG_API_NINJAS_CITY_URL];
 
             var httpClient = new HttpClient();
             HttpResponseMessage response;
@@ -202,7 +202,7 @@ namespace CountryService.Data
         {
             
             Log.Logger.Information("--> Downloading Flags...");
-            var restCountriesApiUrl = configuration[Configurations.Const.CONFIG_REST_COUNTRIES_API_URL];
+            var restCountriesApiUrl = configuration[AppSettingsKeys.Const.CONFIG_REST_COUNTRIES_API_URL];
 
             var httpClient = new HttpClient();
             HttpResponseMessage response;
@@ -245,14 +245,14 @@ namespace CountryService.Data
                     await using var memoryStream = new MemoryStream();
                     await file.CopyToAsync(memoryStream);
                     S3Object s3Object = new S3Object() {
-                        BucketName = configuration[Configurations.Const.CONFIG_AWS_S3_BUCKET_NAME],
+                        BucketName = configuration[AppSettingsKeys.Const.CONFIG_AWS_S3_BUCKET_NAME],
                         InputStream = memoryStream,
                         Name = PATH_AWS_S3_FLAGS + file.FileName
                     };
 
                     var credentials = new AwsCredentials(){
-                        AwsKey = configuration[Configurations.Const.CONFIG_AWS_S3_ACCESS_KEY],
-                        AwsSecretKey = configuration[Configurations.Const.CONFIG_AWS_S3_SECRET_KEY]
+                        AwsKey = configuration[AppSettingsKeys.Const.CONFIG_AWS_S3_ACCESS_KEY],
+                        AwsSecretKey = configuration[AppSettingsKeys.Const.CONFIG_AWS_S3_SECRET_KEY]
                     };
 
                     var result = await storageService.UploadFileAsync(s3Object, credentials);
