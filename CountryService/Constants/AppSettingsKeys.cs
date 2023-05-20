@@ -10,6 +10,7 @@ namespace CountryService.Constants
             public const string CONFIG_SEEDING_FLAGS = CONFIG_SEEDING + ":Flags";
 
             public const string CONFIG_EMAIL = "EmailConfiguration";
+            public const string CONFIG_EMAIL_URL = CONFIG_EMAIL + ":Url";
             public const string CONFIG_EMAIL_API_KEY = CONFIG_EMAIL + ":ApiKey";
             public const string CONFIG_EMAIL_DOMAIN = CONFIG_EMAIL + ":Domain";
 

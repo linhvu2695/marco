@@ -39,14 +39,14 @@ namespace CountryService.Controllers
             }
 
             var passwordEncryptionMethod = Security.Const.PASSWORD_ENCRYPTION_HMACSHA512;
-            CreatePasswordHash(request.Password, passwordEncryptionMethod, out byte[] PasswordHash, out byte[] PasswordSalt);
+            CreatePasswordHash(request.Password, passwordEncryptionMethod, out byte[] passwordHash, out byte[] passwordSalt);
 
             // Create new user
             var newUser = new User()
             {
                 Email = request.Email,
-                PasswordHash = PasswordHash,
-                PasswordSalt = PasswordSalt,
+                PasswordHash = passwordHash,
+                PasswordSalt = passwordSalt,
                 PasswordEncryptionMethod = passwordEncryptionMethod,
                 VerificationToken = CreateRandomToken()
             };
@@ -54,7 +54,7 @@ namespace CountryService.Controllers
             _userRepo.SaveChanges();
 
             // Send confirm email
-            var emailBody = $"Please confirm your email address <a href =\"{TAG_URL}\">Click here</a>";
+            var emailBody = $"Please confirm your email address \n <form method=\"post\" action=\"{TAG_URL}\"><button type=\"submit\">Confirm</button></form>";
             var callbackUrl = Request.Scheme + "://" + Request.Host 
                 + Url.Action("ConfirmEmail", "Auth", new {
                     userId = newUser.Id,
@@ -100,7 +100,7 @@ namespace CountryService.Controllers
             return Ok($"Welcome, user {user.Email}");
         }
 
-        [HttpGet]
+        [HttpPost]
         [Route("ConfirmEmail")]
         public async Task<IActionResult> ConfirmEmail(string userId, string code)
         {
@@ -121,6 +121,47 @@ namespace CountryService.Controllers
             _userRepo.SaveChanges();
             return Ok("Email Verified");
         }
+
+        [HttpPost]
+        [Route("ForgotPassword")]
+        public async Task<IActionResult> ForgotPassword(string email)
+        {
+            _logger.LogInformation($"Email {email} forgot password", DateTime.UtcNow);
+            var user = _userRepo.GetUserByEmail(email);
+            if (user == null)
+            {
+                return BadRequest("User not found");
+            }
+
+            user.PasswordResetToken = CreateRandomToken();
+            user.PasswordResetTokenExpiryTime = DateTime.UtcNow.AddDays(1);
+            _userRepo.SaveChanges();
+            return Ok("User may now reset password");
+        }
+
+        [HttpPost]
+        [Route("ResetPassword")]
+        public async Task<IActionResult> ResetPassword(ResetPasswordRequest request)
+        {
+            var user = _userRepo.GetUserByEmail(request.Email);
+            if (user == null || user.PasswordResetToken != request.Token)
+            {
+                return BadRequest("Invalid reset password parameters");
+            }
+
+            var passwordEncryptionMethod = Security.Const.PASSWORD_ENCRYPTION_HMACSHA512;
+            CreatePasswordHash(request.Password, passwordEncryptionMethod, out byte[] passwordHash, out byte[] passwordSalt);
+            user.PasswordEncryptionMethod = passwordEncryptionMethod;
+            user.PasswordHash = passwordHash;
+            user.PasswordSalt = passwordSalt;
+            user.PasswordResetToken = null;
+            user.PasswordResetTokenExpiryTime = null;
+            _userRepo.SaveChanges();
+
+            return Ok("Password successfully reset");
+        }
+
+        #region private methods
 
         private void CreatePasswordHash(string password, string passwordEncryptionMethod, out byte[] passwordHash, out byte[] passwordSalt)
         {
@@ -166,7 +207,7 @@ namespace CountryService.Controllers
         private bool SendEmail(string body, string receiverEmail)
         {
             // Create client
-            var client = new RestClient("https://api.mailgun.net/v3/");
+            var client = new RestClient(_configuration[AppSettingsKeys.Const.CONFIG_EMAIL_URL]);
 
             var apiKey = _configuration[AppSettingsKeys.Const.CONFIG_EMAIL_API_KEY];
             var encodedApiKey = Convert.ToBase64String(Encoding.UTF8.GetBytes($"api:{apiKey}"));
@@ -191,5 +232,7 @@ namespace CountryService.Controllers
         {
             return Convert.ToHexString(RandomNumberGenerator.GetBytes(64));
         }
+
+        #endregion
     }
 }

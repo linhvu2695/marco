@@ -4,11 +4,13 @@ using System.ComponentModel.DataAnnotations;
 
 namespace CountryService.Dtos
 {
-    public class UserRegistrationRequest
+    public class ResetPasswordRequest
     {
         [Required]
-        [EmailAddress]
         public string Email { get; set; } = string.Empty;
+
+        [Required]
+        public string Token { get; set; } = string.Empty;
 
         [Required]
         [RegularExpression(
