@@ -29,6 +29,8 @@ builder.Services.AddElasticSearch(builder.Configuration);
 
 builder.Services.AddControllersWithViews();
 
+builder.Services.AddHostedService<BackgroundWorkerService>();
+
 // CSS isolation for MVC would not work if RazorRuntimeCompilation is enabled
 // builder.Services.AddRazorPages().AddRazorRuntimeCompilation();
 
